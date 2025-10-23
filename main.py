@@ -43,7 +43,7 @@ def render_reflection(index, question_types, available_topics):
     
     # Dynamically show statements for selected question type
     statements = question_types[question_type].get("statements", [])
-    st.markdown("**Select applicable statements:**")
+    st.write("Select applicable statements:")
 
     selected_statements = []
     for i, stmt in enumerate(statements):
@@ -56,7 +56,7 @@ def render_reflection(index, question_types, available_topics):
     selected_option_statements = {}
     
     if options:
-        st.markdown("**Select relevant options:**")
+        st.write("Select relevant options:")
         # Step 1: let student choose which constructs are relevant
         relevant_options = []
         for option in options.keys():
@@ -65,7 +65,7 @@ def render_reflection(index, question_types, available_topics):
         
         # Step 2: show statements only for selected constructs
         for option in relevant_options:
-            st.markdown(f"**Statements about {option}:**")
+            st.write(f"Statements about {option}:")
             option_statements = options[option].get("statements", [])
             selected_statements_for_option = []
             for j, stmt in enumerate(option_statements):
@@ -94,6 +94,21 @@ def render_reflection(index, question_types, available_topics):
     ) 
 
 def main():
+    st.markdown("""
+        <style>
+            * {
+                font-size: 16px !important;   /* sets base font size for everything */
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-size: revert !important;  /* keeps Streamlit's default heading sizes */
+            }
+            label[data-baseweb="checkbox"] > div:first-child {
+                font-size: 16px !important;    /* ensures checkboxes match the text size */
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
     st.title("Assessment Reflection")
 
     subjects_path = Path("./subjects")
