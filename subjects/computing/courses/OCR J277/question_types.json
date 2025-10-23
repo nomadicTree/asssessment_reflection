@@ -27,18 +27,50 @@
             "Took and stored all required inputs",
             "Wrote all operators correctly (e.g. =, ==, <=, !=, DIV, MOD)"],
         "options": {
+            "Subprograms": {
+                "statements": [
+                    "Identified where a subprogram was needed",
+                    "Attempted to use subprograms",
+                    "Identified the need for a function",
+                    "Created a function that returned a value correctly",
+                    "Identified the need for a procedure",
+                    "Defined a subprogram correctly (e.g., def name(parameters))",
+                    "Used parameters correctly instead of taking inputs within the subprogram",
+                    "Included the correct number of parameters in each subprogram call"
+                ]
+            },
             "Selection": {
                 "statements": [
-                    "Identified the need for selection",
-                    "Attempted selection"
+                    "Identified where selection (if/else) was needed",
+                    "Attempted selection using if/else statements",
+                    "Used appropriate logical conditions for decision making"
                 ]
             },
             "Iteration": {
                 "statements": [
-                    "Identified the need for iteration"
+                    "Identified where iteration was needed",
+                    "Attempted iteration",
+                    "Used a count-controlled (for) loop where appropriate",
+                    "Used a condition-controlled (while/do-while) loop where appropriate",
+                    "Wrote a correct and terminating loop condition"
+                ]
+            },
+            "Arrays (including 2D)": {
+                "statements": [
+                    "Identified where an array was needed",
+                    "Attempted to use an array",
+                    "Accessed or updated array elements correctly",
+                    "Used nested loops correctly for 2D arrays"
+                ]
+            },
+            "File handling": {
+                "statements": [
+                    "Identified where file handling was needed",
+                    "Attempted file handling",
+                    "Opened and closed files correctly",
+                    "Read from or wrote to files appropriately"
                 ]
             }
-            
         }
     }
 }
