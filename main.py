@@ -96,19 +96,17 @@ def render_reflection(index, question_types, available_topics):
 def main():
     st.markdown("""
         <style>
-            * {
-                font-size: 16px !important;   /* sets base font size for everything */
+            /* Base font size for most text elements */
+            body, p, span, div, li {
+                font-size: 16px !important;
             }
-            h1, h2, h3, h4, h5, h6 {
-                font-size: revert !important;  /* keeps Streamlit's default heading sizes */
-            }
+
+            /* Ensure checkboxes match text size */
             label[data-baseweb="checkbox"] > div:first-child {
-                font-size: 16px !important;    /* ensures checkboxes match the text size */
+                font-size: 16px !important;
             }
         </style>
     """, unsafe_allow_html=True)
-
-
     st.title("Assessment Reflection")
 
     subjects_path = Path("./subjects")
