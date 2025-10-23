@@ -67,7 +67,7 @@ def render_reflection(index, question_types, available_topics):
         
         # Step 2: show statements only for selected constructs
         for option in relevant_options:
-            st.write(f"{option}:")
+            st.write(f"**{option}:**")
             option_statements = options[option].get("statements", [])
             selected_statements_for_option = []
             for j, stmt in enumerate(option_statements):
