@@ -8,42 +8,44 @@ def render_reflection(index, question_types, available_topics):
     st.subheader(f"Reflection {index + 1}:")
     
     question_number = st.text_input(
-        "Question number:",
+        "**Question number:**",
         key=f"question_number_{index}"
     )
-    
-    available_marks = st.number_input(
-        "Marks available:",
-        min_value=0,
-        step=1,
-        key=f"available_marks_{index}"
-    )
-    
-    achieved_marks = st.number_input(
-        "Marks achieved:",
-        min_value=0,
-        step=1,
-        max_value=available_marks,
-        key=f"achieved_marks_{index}"
-    )
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        available_marks = st.number_input(
+            "**Marks available:**",
+            min_value=0,
+            step=1,
+            key=f"available_marks_{index}"
+        )
+    with col2:
+        achieved_marks = st.number_input(
+            "**Marks achieved:**",
+            min_value=0,
+            step=1,
+            max_value=available_marks,
+            key=f"achieved_marks_{index}"
+        )
     
     # Select question type
     question_type = st.radio(
-        "Type of question:",
+        "**Type of question:**",
         list(question_types.keys()),
         key=f"question_type_{index}"
     )
     
     # Multiselect for topics
     topics = st.multiselect(
-        "Which topic(s) does this question assess?",
+        "**Which topic(s) does this question assess?**",
         available_topics,
         key=f"topics_{index}"
     )
     
     # Dynamically show statements for selected question type
     statements = question_types[question_type].get("statements", [])
-    st.write("Select applicable statements:")
+    st.markdown("**Select applicable statements:**")
 
     selected_statements = []
     for i, stmt in enumerate(statements):
@@ -56,7 +58,7 @@ def render_reflection(index, question_types, available_topics):
     selected_option_statements = {}
     
     if options:
-        st.write("Select relevant options:")
+        st.markdown("**Select relevant options:**")
         # Step 1: let student choose which constructs are relevant
         relevant_options = []
         for option in options.keys():
@@ -76,7 +78,7 @@ def render_reflection(index, question_types, available_topics):
     
 
     written_reflection = st.text_area(
-        "Reflecting on the above, what would you do differently next time to improve your response to a question like this?",
+        "**Reflecting on the above, what would you do differently next time to improve your response to a question like this?**",
         height=150,
         key=f"future_reflection_{index}"
     )
@@ -112,13 +114,13 @@ def main():
     subjects_path = Path("./subjects")
     subjects = [d.name.title() for d in subjects_path.iterdir() if d.is_dir()]
 
-    student_name = st.text_input("Enter your name:")
-    assessment_name = st.text_input("Enter the assessment name:")
-    subject = st.radio("Subject:", subjects)
+    student_name = st.text_input("**Your name:**")
+    assessment_name = st.text_input("**Assessment name:**")
+    subject = st.radio("**Subject:**", subjects)
 
     courses_path = subjects_path / subject.lower() / "courses"
     courses = [f.name for f in courses_path.iterdir() if f.is_dir()]
-    course = st.radio("Course:", courses)
+    course = st.radio("**Course:**", courses)
     st.divider()
 
     # Load topics
