@@ -166,23 +166,29 @@ def main():
                 summary_text += f"  Marks achieved: {r.achieved_marks}\n"
                 summary_text += f"  Question type: {r.question_type}\n"
                 summary_text += f"  Topics:\n"
-                for topic in r.topics:
-                    summary_text += f"    - {topic}\n"
-                summary_text += f"  Statements:\n"
-                for stmt in r.selected_statements:
-                    summary_text += f"    - {stmt}\n"
-
+                if r.topics:
+                    for topic in r.topics:
+                        summary_text += f"    - {topic}\n"
+                else:
+                    summary_text += "    - None selected\n"
+                summary_text += "  Statements:\n"
+                if r.selected_statements:
+                    for stmt in r.selected_statements:
+                        summary_text += f"    - {stmt}\n"
+                else:
+                    summary_text += "    - None selected\n"
                 if hasattr(r, 'selected_option_statements') and r.selected_option_statements:
                     summary_text += f"  Option statements:\n"
                     for option, statements in r.selected_option_statements.items():
                         summary_text += f"    {option}:\n"
-                        for stmt in statements:
-                            summary_text += f"      - {stmt}\n"
+                        if statements:
+                            for stmt in statements:
+                                summary_text += f"      - {stmt}\n"
+                        else:
+                            summary_text += "      - None selected\n"
 
                 summary_text += f"  Written reflection:\n"
-                for line in r.written_reflection.splitlines():
-                    summary_text += f"    {line}\n"
-                summary_text += "\n"
+                summary_text += f"    {r.written_reflection}"
 
             st.download_button(
                 label="📄 Download summary (TXT)",
