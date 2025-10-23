@@ -65,7 +65,7 @@ def render_reflection(index, question_types, available_topics):
         
         # Step 2: show statements only for selected constructs
         for option in relevant_options:
-            st.write(f"Statements about {option}:")
+            st.write(f"{option}:")
             option_statements = options[option].get("statements", [])
             selected_statements_for_option = []
             for j, stmt in enumerate(option_statements):
@@ -176,7 +176,7 @@ def main():
                 else:
                     summary_text += "    - None selected\n"
                 if hasattr(r, 'selected_option_statements') and r.selected_option_statements:
-                    summary_text += f"  Option statements:\n"
+                    summary_text += "  Option statements:\n"
                     for option, statements in r.selected_option_statements.items():
                         summary_text += f"    {option}:\n"
                         if statements:
