@@ -1,0 +1,44 @@
+{
+    "Non-programming": {
+        "statements": [
+            "Attempted the question",
+            "Understood the question",
+            "Revised the relevant topic(s)",
+            "Knew the answer",
+            "Made as many points as there were marks available",
+            "Showed all my working",
+            "Did all calculations correctly",
+            "Related my answer back to the scenario",
+            "Wrote concisely"]
+    },
+    "Programming": {
+        "statements": [
+            "Attempted the question",
+            "Understood the question",
+            "Revised the relevant topic(s)",
+            "Knew the answer",
+            "Made as many points as there were marks available",
+            "Showed all my working",
+            "Did all calculations correctly",
+            "Related my answer back to the scenario",
+            "Wrote concisely",
+            "Used valid identifiers for all variables and sub-programs",
+            "Used meaningful identifiers for all variables and sub-programs",
+            "Took and stored all required inputs",
+            "Wrote all operators correctly (e.g. =, ==, <=, !=, DIV, MOD)"],
+        "options": {
+            "Selection": {
+                "statements": [
+                    "Identified the need for selection",
+                    "Attempted selection"
+                ]
+            },
+            "Iteration": {
+                "statements": [
+                    "Identified the need for iteration"
+                ]
+            }
+            
+        }
+    }
+}
