@@ -58,7 +58,7 @@ def render_reflection(index, question_types, available_topics):
     selected_option_statements = {}
     
     if options:
-        st.markdown("**Select relevant options:**")
+        st.markdown("**Select applicable options:**")
         # Step 1: let student choose which constructs are relevant
         relevant_options = []
         for option in options.keys():
