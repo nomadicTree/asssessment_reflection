@@ -182,7 +182,7 @@ def main():
     apply_styles()
     st.title("Assessment Reflection")
     st.set_page_config(
-        page_title="Assessnent Reflection",
+        page_title="Assessment Reflection",
     )
 
     subjects_path = Path("./subjects")
