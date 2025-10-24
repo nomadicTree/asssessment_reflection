@@ -1,15 +1,161 @@
 import streamlit as st
-import pandas as pd
-import json
+import yaml
 from pathlib import Path
 from question_reflection import Reflection
 
-def render_reflection(index, question_types, available_topics):
-    st.subheader(f"Reflection {index + 1}:")
+SUBJECTS_FILE = "subjects.yaml"
+TEMPLATES_DIR = Path("templates")
+
+def load_yaml(file_path: Path):
+    """Load a YAML file and return a dictionary. Returns {} if empty or invalid."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+        if data is None:
+            return {}
+        return data
+
+def load_all_templates(templates_dir):
+    """
+    Recursively load all YAML templates in the directory and subdirectories.
+    Returns a dict keyed by template id.
+    """
+    templates_dir = Path(templates_dir)
+    templates = {}
+
+    for file_path in templates_dir.rglob("*.yaml"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+            template_id = config.get("id")
+            if not template_id:
+                raise ValueError(f"Template {file_path} has no 'id' field.")
+            templates[template_id] = config
     
+    return templates
+
+def merge_configs(base, override):
+    """Merge override config into base config, deduplicating statements."""
+    merged = base.copy()
+
+    # Merge top-level statements
+    base_statements = base.get("statements", [])
+    override_statements = override.get("statements", [])
+    merged["statements"] = list(dict.fromkeys(base_statements + override_statements))
+
+    # Merge question_types
+    base_qt = base.get("question_types", {})
+    override_qt = override.get("question_types", {})
+    merged_qt = base_qt.copy()
+    
+    for qt_name, qt_data in override_qt.items():
+        if qt_name in merged_qt:
+            merged_qt[qt_name]["statements"] = list(
+                dict.fromkeys(
+                    merged_qt[qt_name].get("statements", []) + qt_data.get("statements", [])
+                )
+            )
+            # Merge options if they exist
+            base_options = merged_qt[qt_name].get("options", {})
+            override_options = qt_data.get("options", {})
+            for opt_name, opt_data in override_options.items():
+                if opt_name in base_options:
+                    base_options[opt_name]["statements"] = list(
+                        dict.fromkeys(
+                            base_options[opt_name].get("statements", []) + opt_data.get("statements", [])
+                        )
+                    )
+                else:
+                    base_options[opt_name] = opt_data
+            if base_options:
+                merged_qt[qt_name]["options"] = base_options
+        else:
+            merged_qt[qt_name] = qt_data
+    
+    merged["question_types"] = merged_qt
+    return merged
+
+def load_template(template_id, all_templates, visited=None):
+    """
+    Recursively load a template by id, merging all inherited templates.
+    `all_templates` should be the dict returned by load_all_templates().
+    """
+    if visited is None:
+        visited = set()
+    
+    if template_id in visited:
+        raise ValueError(f"Circular inheritance detected: {template_id}")
+    visited.add(template_id)
+
+    template = all_templates.get(template_id)
+    if not template:
+        raise FileNotFoundError(f"Template '{template_id}' not found in loaded templates.")
+
+    inherits = template.get("inherits")
+    if not inherits:
+        return template
+
+    # Ensure inherits is a list
+    if isinstance(inherits, str):
+        inherits = [inherits]
+
+    merged = {}
+    for parent_id in inherits:
+        parent_template = load_template(parent_id, all_templates, visited)
+        merged = merge_configs(merged, parent_template)
+
+    # Merge current template last so it overrides parents
+    merged = merge_configs(merged, template)
+    return merged
+    """
+    Load a template YAML file and all its inherited templates recursively,
+    merging statements and question_types.
+    """
+    if loaded is None:
+        loaded = {}
+
+    template_file = templates_dir / f"{template_name}.yaml"
+    if not template_file.exists():
+        raise FileNotFoundError(f"Template file not found: {template_file}")
+
+    config = load_yaml(template_file)
+
+    # Fallback for empty file
+    if config is None:
+        config = {}
+
+    template_id = config.get("id", template_name)
+    if template_id in loaded:
+        # Avoid circular inheritance
+        return loaded[template_id]
+
+    # Start with empty base
+    merged_config = {"statements": [], "question_types": {}}
+
+    # Handle inheritance
+    inherits = config.get("inherits") or []
+    if isinstance(inherits, str):
+        inherits = [inherits]
+
+    for parent_name in inherits:
+        parent_config = load_template(parent_name, templates_dir, loaded)
+        merged_config = merge_configs(merged_config, parent_config)
+
+    # Merge this template's own data
+    merged_config = merge_configs(merged_config, config)
+
+    # Cache the loaded template
+    loaded[template_id] = merged_config
+    return merged_config
+
+def render_reflection(index, course_reflection_data, available_topics):
+    st.subheader(f"Reflection {index + 1}:")
+    core_statements = course_reflection_data.get("statements", [])
+    question_types = course_reflection_data.get("question_types", {})
+    question_type_names = list(question_types.keys())
+
     question_number = st.text_input(
         "**Question number:**",
-        key=f"question_number_{index}"
+        key=f"question_number_{index}",
+        placeholder="E.g., 5.b.ii"
     )
 
     col1, col2 = st.columns([1, 1])
@@ -28,47 +174,59 @@ def render_reflection(index, question_types, available_topics):
             max_value=available_marks,
             key=f"achieved_marks_{index}"
         )
-    
+
+    if available_marks > 0:
+        marks_percent = int((achieved_marks / available_marks) * 100)
+    else:
+        marks_percent = 0
+    st.progress(marks_percent / 100)
+
     # Select question type
-    question_type = st.radio(
+    selected_question_type_name = st.radio(
         "**Type of question:**",
-        list(question_types.keys()),
-        key=f"question_type_{index}"
+        question_type_names,
+        key=f"question_type_{index}",
     )
     
+    selected_question_type = question_types[selected_question_type_name]
+    statements = core_statements + selected_question_type.get("statements", [])
+
     # Multiselect for topics
-    topics = st.multiselect(
+    selected_topics = st.multiselect(
         "**Which topic(s) does this question assess?**",
         available_topics,
-        key=f"topics_{index}"
+        key=f"topics_{index}",
+        placeholder="Choose topics"
     )
     
-    # Dynamically show statements for selected question type
-    statements = question_types[question_type].get("statements", [])
     st.markdown("**Select applicable statements:**")
 
     selected_statements = []
-    for i, stmt in enumerate(statements):
-        checked = st.checkbox(stmt, key=f"statement_{index}_{i}")
+    for i, statement in enumerate(statements):
+        checked = st.checkbox(statement, key=f"statement_{index}_{i}")
         if checked:
-            selected_statements.append(stmt)
+            selected_statements.append(statement)
     
     # Options (e.g., programming constructs)
-    options = question_types[question_type].get("options", {})
+    available_options = selected_question_type.get("options", {})
     selected_option_statements = {}
     
-    if options:
-        st.markdown("**Select applicable options:**")
+    if available_options:
         # Step 1: let student choose which constructs are relevant
-        relevant_options = []
-        for option in options.keys():
-            if st.checkbox(option, key=f"option_{index}_{option}"):
-                relevant_options.append(option)
+        selected_options = st.multiselect(
+            "**Select applicable options:**",
+            available_options,
+            key=f"options_{index}",
+            placeholder="Choose options"
+        )
+        #for option in options.keys():
+        #    if st.checkbox(option, key=f"option_{index}_{option}"):
+        #        relevant_options.append(option)
         
         # Step 2: show statements only for selected constructs
-        for option in relevant_options:
+        for option in selected_options:
             st.write(f"**{option}:**")
-            option_statements = options[option].get("statements", [])
+            option_statements = available_options[option].get("statements", [])
             selected_statements_for_option = []
             for j, stmt in enumerate(option_statements):
                 checked = st.checkbox(stmt, key=f"option_statement_{index}_{option}_{j}")
@@ -88,8 +246,8 @@ def render_reflection(index, question_types, available_topics):
         question_number,
         available_marks,
         achieved_marks,
-        question_type,
-        topics,
+        selected_question_type_name,
+        selected_topics,
         selected_statements,
         selected_option_statements,
         written_reflection
@@ -103,7 +261,7 @@ def generate_summary_text(student_name, assessment_name, reflections, knowledge,
     if student_name:
         summary_text += f"Name: {student_name}\n"
     if assessment_name:
-        summary_text += f"Assessment: {assessment_name}"
+        summary_text += f"Assessment: {assessment_name}\n"
     for r in reflections:
         summary_text += f"Question {r.question_number}\n"
         summary_text += f"  Marks: {r.achieved_marks}/{r.available_marks}\n"
@@ -181,30 +339,27 @@ def generate_file_name(student_name, assessment_name, extension):
 def main():
     apply_styles()
     st.title("Assessment Reflection")
+    all_templates = load_all_templates(TEMPLATES_DIR)
 
-    subjects_path = Path("./subjects")
-    subjects = [d.name.title() for d in subjects_path.iterdir() if d.is_dir()]
+    subject_courses = load_yaml(SUBJECTS_FILE)
 
     student_name = st.text_input("**Your name:**").strip()
     assessment_name = st.text_input("**Assessment name:**").strip()
-    subject = st.radio("**Subject:**", subjects)
 
-    courses_path = subjects_path / subject.lower() / "courses"
-    courses = [f.name for f in courses_path.iterdir() if f.is_dir()]
-    course = st.radio("**Course:**", courses)
+    available_subjects = subject_courses["subjects"]
+    selected_subject = st.radio("**Subject:**", list(available_subjects.keys()))
+
+    available_courses = available_subjects[selected_subject]["courses"]
+    selected_course = st.radio("**Course:**", list(available_courses.keys()))
+
+    course_info = available_courses[selected_course]
+    template_id = course_info.get("template")
+    course_reflection_data = load_template(template_id, all_templates)
+
+    available_topics = available_courses[selected_course]["topics"]
+    friendly_topic_list = [f"{t['code']}: {t['name']}" for t in available_topics]
+
     st.divider()
-
-    # Load topics
-    course_path = courses_path / course
-    topic_file = course_path / "topics.json"
-    with open(topic_file, "r", encoding="utf-8") as f:
-        topics = json.load(f)
-    topic_list = [f"{t['code']}: {t['name']}" for t in topics]
-
-    # Load question types
-    question_types_file = course_path / "question_types.json"
-    with open(question_types_file, "r", encoding="utf-8") as f:
-        question_types = json.load(f)
 
     # Initialise reflections if not already in session_state
     if "reflections" not in st.session_state:
@@ -217,7 +372,7 @@ def main():
     else:
         # Render all current reflections
         for i in range(len(st.session_state.reflections)):
-            render_reflection(i, question_types, topic_list)
+            render_reflection(i, course_reflection_data, friendly_topic_list)
     if st.button("➕ Add new question", use_container_width=True):
         st.session_state.reflections.append(Reflection())
         st.rerun()
@@ -227,8 +382,8 @@ def main():
     if st.session_state.reflections:
         st.subheader("General reflections")
         knowledge_reflection = st.text_area("**What topics do you need to revise?**", height=150).strip()
-        skills_reflection = st.text_area("**What strategies or methods could you use next time?**", height=150).strip()
         execution_reflection = st.text_area("**What mistakes will you try to avoid next time?**", height=150).strip()
+        skills_reflection = st.text_area("**What strategies or methods could you use next time?**", height=150).strip()
         time_reflection = st.text_area("**What would you change about how you plan or pace your work?**", height=150).strip()
         summary_text = generate_summary_text(student_name,
             assessment_name,
