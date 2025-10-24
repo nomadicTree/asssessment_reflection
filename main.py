@@ -78,7 +78,7 @@ def render_reflection(index, question_types, available_topics):
     
 
     written_reflection = st.text_area(
-        "**Reflecting on the above, what would you do differently next time to improve your response to a question like this?**",
+        "**What could you do differently to improve your response to a question like this?**",
         height=150,
         key=f"future_reflection_{index}"
     ).strip()
@@ -222,10 +222,10 @@ def main():
     # Only show download if at least one reflection exists
     if st.session_state.reflections:
         st.subheader("General reflections")
-        knowledge_reflection = st.text_area("What topics do you need to revise?", height=150).strip()
-        skills_reflection = st.text_area("What strategies or methods could you use next time?", height=150).strip()
-        execution_reflection = st.text_area("What mistakes will you try to avoid next time?", height=150).strip()
-        time_reflection = st.text_area("What would you change about how you plan or pace your work?", height=150).strip()
+        knowledge_reflection = st.text_area("**What topics do you need to revise?**", height=150).strip()
+        skills_reflection = st.text_area("**What strategies or methods could you use next time?**", height=150).strip()
+        execution_reflection = st.text_area("**What mistakes will you try to avoid next time?**", height=150).strip()
+        time_reflection = st.text_area("**What would you change about how you plan or pace your work?**", height=150).strip()
         summary_text = generate_summary_text(student_name,
             assessment_name,
             st.session_state.reflections,
