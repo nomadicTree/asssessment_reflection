@@ -1,0 +1,10 @@
+id: selection
+inherits: null
+question_types:
+  Programming:
+    options:
+      Selection:
+        statements:
+          - Identified the need for selection (if/else/switch)
+          - Attempted using selection
+          - Balanced both sides of all logical operators (e.g., y < x AND x < z)

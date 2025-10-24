@@ -1,0 +1,14 @@
+# basic_programming.yaml
+id: basic_programming
+inherits:
+  - selection
+  - iteration
+  - subprograms
+question_types:
+  Programming:
+    statements:
+      - Used valid identifiers
+      - Used meaningful names for variables and subprograms
+      - Took and stored all required inputs
+      - Wrote all operators correctly  # e.g., ==, <=, DIV, MOD
+      - Only used subprograms where instructed

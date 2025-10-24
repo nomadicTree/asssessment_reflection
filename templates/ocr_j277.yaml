@@ -1,0 +1,11 @@
+id: ocr_j277
+inherits:
+  - common
+  - basic_programming
+
+question_types:
+  Non-programming:
+    statements:
+      - Showed all my working
+      - Did all calculations accurately
+      - Linked my answer to the scenario

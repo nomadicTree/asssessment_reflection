@@ -1,0 +1,11 @@
+id: subprograms
+inherits: null
+question_types:
+  Programming:
+    options:
+      Subprograms:
+        statements:
+          - Identified the need for subprograms
+          - Attempted using subprograms
+          - Wrote a correct subprogram definition (e.g., def name(parameters):)
+          - Did not override parameters with inputs 

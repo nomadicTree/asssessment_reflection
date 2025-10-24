@@ -1,0 +1,8 @@
+# common.yaml
+id: common
+inherits: null
+statements:
+  - Attempted the question
+  - Understood the question
+  - Revised the relevant topic(s)
+  - Knew how to answer the question
