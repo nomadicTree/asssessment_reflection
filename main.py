@@ -81,7 +81,7 @@ def render_reflection(index, question_types, available_topics):
         "**Reflecting on the above, what would you do differently next time to improve your response to a question like this?**",
         height=150,
         key=f"future_reflection_{index}"
-    )
+    ).strip()
     
     # Save everything in session_state
     st.session_state.reflections[index] = Reflection(
@@ -95,7 +95,61 @@ def render_reflection(index, question_types, available_topics):
         written_reflection
     ) 
 
-def main():
+    if index + 1 < len(st.session_state.reflections):
+        print(index, len(st.session_state.reflections))
+        st.divider()
+
+def generate_summary_text(student_name, assessment_name, reflections, knowledge, skills, execution, time):
+    summary_text = ""
+    if student_name:
+        summary_text += f"Name: {student_name}\n"
+    if assessment_name:
+        summary_text += f"Assessment: {assessment_name}"
+    for r in reflections:
+        summary_text += f"Question {r.question_number}\n"
+        summary_text += f"  Marks: {r.achieved_marks}/{r.available_marks}\n"
+        summary_text += f"  Question type: {r.question_type}\n"
+        summary_text += "  Topics:\n"
+        if r.topics:
+            for topic in r.topics:
+                summary_text += f"    - {topic}\n"
+        else:
+            summary_text += "    - None selected\n"
+        summary_text += "  Statements:\n"
+        if r.selected_statements:
+            for statement in r.selected_statements:
+                summary_text += f"    - {statement}\n"
+        else:
+            summary_text += "    - None selected\n"
+        if hasattr(r, 'selected_option_statements') and r.selected_option_statements:
+            summary_text += "  Option statements:\n"
+            for option, statements in r.selected_option_statements.items():
+                summary_text += f"    {option}:\n"
+                if statements:
+                    for statement in statements:
+                        summary_text += f"      - {statement}\n"
+                else:
+                    summary_text += "      - None selected\n"
+
+        summary_text += f"  Written reflection:\n"
+        if r.written_reflection:
+            summary_text += f"    {r.written_reflection}\n"
+        else:
+            summary_text += "    None written\n"
+
+        summary_text += "\n"
+
+        if knowledge:
+            summary_text += f"Topics to revise:\n  {knowledge}\n"
+        if skills:
+            summary_text += f"Strategies/methods for next time:\n  {skills}\n"
+        if execution:
+            summary_text += f"Mistakes to avoid:\n  {execution}\n"
+        if time:
+            summary_text += f"Plans and timing:\n  {time}\n"
+    return summary_text.strip()
+
+def apply_stles():
     st.markdown("""
         <style>
             /* Base font size for most text elements */
@@ -109,13 +163,16 @@ def main():
             }
         </style>
     """, unsafe_allow_html=True)
+
+def main():
+    apply_stles()
     st.title("Assessment Reflection")
 
     subjects_path = Path("./subjects")
     subjects = [d.name.title() for d in subjects_path.iterdir() if d.is_dir()]
 
-    student_name = st.text_input("**Your name:**")
-    assessment_name = st.text_input("**Assessment name:**")
+    student_name = st.text_input("**Your name:**").strip()
+    assessment_name = st.text_input("**Assessment name:**").strip()
     subject = st.radio("**Subject:**", subjects)
 
     courses_path = subjects_path / subject.lower() / "courses"
@@ -141,62 +198,40 @@ def main():
 
     # If no reflections yet, encourage user to start
     if not st.session_state.reflections:
-        st.info("Click **'Add new reflection'** below to start your reflection.")
+        st.info("Click **'Add new question'** below to start your reflection.")
+
     else:
         # Render all current reflections
         for i in range(len(st.session_state.reflections)):
             render_reflection(i, question_types, topic_list)
+    if st.button("➕ Add new question", use_container_width=True):
+        st.session_state.reflections.append(Reflection())
+        st.rerun()
 
-    # --- Bottom section: Add + Download side by side ---
+
+
     st.divider()
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        if st.button("➕ Add new reflection", use_container_width=True):
-            st.session_state.reflections.append(Reflection())
-            st.rerun()
-
-    with col2:
-        # Only show download if at least one reflection exists
-        if st.session_state.reflections:
-            summary_text = f"{assessment_name} | {student_name}\n\n"
-            for i, r in enumerate(st.session_state.reflections):
-                summary_text += f"Question {r.question_number}\n"
-                summary_text += f"  Marks available: {r.available_marks}\n"
-                summary_text += f"  Marks achieved: {r.achieved_marks}\n"
-                summary_text += f"  Question type: {r.question_type}\n"
-                summary_text += f"  Topics:\n"
-                if r.topics:
-                    for topic in r.topics:
-                        summary_text += f"    - {topic}\n"
-                else:
-                    summary_text += "    - None selected\n"
-                summary_text += "  Statements:\n"
-                if r.selected_statements:
-                    for stmt in r.selected_statements:
-                        summary_text += f"    - {stmt}\n"
-                else:
-                    summary_text += "    - None selected\n"
-                if hasattr(r, 'selected_option_statements') and r.selected_option_statements:
-                    summary_text += "  Option statements:\n"
-                    for option, statements in r.selected_option_statements.items():
-                        summary_text += f"    {option}:\n"
-                        if statements:
-                            for stmt in statements:
-                                summary_text += f"      - {stmt}\n"
-                        else:
-                            summary_text += "      - None selected\n"
-
-                summary_text += f"  Written reflection:\n"
-                summary_text += f"    {r.written_reflection}"
-
-            st.download_button(
-                label="📄 Download summary (TXT)",
-                data=summary_text,
-                file_name="reflections_summary.txt",
-                mime="text/plain",
-                use_container_width=True
-            )
+    # Only show download if at least one reflection exists
+    if st.session_state.reflections:
+        st.subheader("General reflections")
+        knowledge_reflection = st.text_area("What topics do you need to revise?", height=150).strip()
+        skills_reflection = st.text_area("What strategies or methods could you use next time?", height=150).strip()
+        execution_reflection = st.text_area("What mistakes will you try to avoid next time?", height=150).strip()
+        time_reflection = st.text_area("What would you change about how you plan or pace your work?", height=150).strip()
+        summary_text = generate_summary_text(student_name,
+            assessment_name,
+            st.session_state.reflections,
+            knowledge_reflection,
+            skills_reflection,
+            execution_reflection,
+            time_reflection) 
+        st.download_button(
+            label="📄 Download summary (TXT)",
+            data=summary_text,
+            file_name=f"{student_name} - {assessment_name} reflections summary.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 
 if __name__ == "__main__":
     main()
