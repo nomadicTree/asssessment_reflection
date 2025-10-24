@@ -339,7 +339,6 @@ def generate_file_name(student_name, assessment_name, extension):
 def main():
     apply_styles()
     st.title("Assessment Reflection")
-    all_templates = load_all_templates(TEMPLATES_DIR)
 
     subject_courses = load_yaml(SUBJECTS_FILE)
 
