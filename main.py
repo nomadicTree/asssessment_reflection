@@ -164,6 +164,17 @@ def apply_stles():
         </style>
     """, unsafe_allow_html=True)
 
+def generate_file_name(student_name, assessment_name, extension):
+    file_name = ""
+    if student_name:
+        file_name += student_name
+        if assessment_name:
+            file_name += f" - {assessment_name}"
+    elif assessment_name:
+        file_name += f"{assessment_name}"
+    file_name += f" reflection summary.{extension}"
+    return file_name.strip()
+
 def main():
     apply_stles()
     st.title("Assessment Reflection")
@@ -225,10 +236,13 @@ def main():
             skills_reflection,
             execution_reflection,
             time_reflection) 
+
+
+
         st.download_button(
             label="📄 Download summary (TXT)",
             data=summary_text,
-            file_name=f"{student_name} - {assessment_name} reflections summary.txt",
+            file_name=generate_file_name(student_name, assessment_name, "txt"),
             mime="text/plain",
             use_container_width=True
         )
