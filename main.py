@@ -103,7 +103,7 @@ def generate_summary_text(student_name, assessment_name, reflections, knowledge,
     if student_name:
         summary_text += f"Name: {student_name}\n"
     if assessment_name:
-        summary_text += f"Assessment: {assessment_name}"
+        summary_text += f"Assessment: {assessment_name}\n"
     for r in reflections:
         summary_text += f"Question {r.question_number}\n"
         summary_text += f"  Marks: {r.achieved_marks}/{r.available_marks}\n"
