@@ -181,7 +181,9 @@ def generate_file_name(student_name, assessment_name, extension):
 def main():
     apply_styles()
     st.title("Assessment Reflection")
-    st.page_title("Assessment Reflection")
+    st.set_page_config(
+        page_title="Assessnent Reflection",
+    )
 
     subjects_path = Path("./subjects")
     subjects = [d.name.title() for d in subjects_path.iterdir() if d.is_dir()]
