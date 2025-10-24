@@ -96,7 +96,6 @@ def render_reflection(index, question_types, available_topics):
     ) 
 
     if index + 1 < len(st.session_state.reflections):
-        print(index, len(st.session_state.reflections))
         st.divider()
 
 def generate_summary_text(student_name, assessment_name, reflections, knowledge, skills, execution, time):
@@ -219,8 +218,6 @@ def main():
         st.session_state.reflections.append(Reflection())
         st.rerun()
 
-
-
     st.divider()
     # Only show download if at least one reflection exists
     if st.session_state.reflections:
@@ -236,8 +233,6 @@ def main():
             skills_reflection,
             execution_reflection,
             time_reflection) 
-
-
 
         st.download_button(
             label="📄 Download summary (TXT)",
