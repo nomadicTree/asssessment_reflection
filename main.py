@@ -148,7 +148,7 @@ def generate_summary_text(student_name, assessment_name, reflections, knowledge,
             summary_text += f"Plans and timing:\n  {time}\n"
     return summary_text.strip()
 
-def apply_stles():
+def apply_styles():
     st.markdown("""
         <style>
             /* Base font size for most text elements */
@@ -159,6 +159,10 @@ def apply_stles():
             /* Ensure checkboxes match text size */
             label[data-baseweb="checkbox"] > div:first-child {
                 font-size: 16px !important;
+            }
+
+            @media print {
+            button, st.button, footer, header {display: none !important;}
             }
         </style>
     """, unsafe_allow_html=True)
@@ -175,7 +179,7 @@ def generate_file_name(student_name, assessment_name, extension):
     return file_name.strip()
 
 def main():
-    apply_stles()
+    apply_styles()
     st.title("Assessment Reflection")
 
     subjects_path = Path("./subjects")
