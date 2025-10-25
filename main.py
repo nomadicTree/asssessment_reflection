@@ -256,7 +256,7 @@ def render_reflection(index, course_reflection_data, available_topics):
     if index + 1 < len(st.session_state.reflections):
         st.divider()
 
-def generate_summary_text(student_name, assessment_name, reflections, knowledge, skills, execution, time):
+def generate_summary_text(student_name, assessment_name, reflections, general_reflections):
     summary_text = ""
     if student_name:
         summary_text += f"Name: {student_name}\n"
@@ -296,14 +296,9 @@ def generate_summary_text(student_name, assessment_name, reflections, knowledge,
 
         summary_text += "\n"
 
-        if knowledge:
-            summary_text += f"Topics to revise:\n  {knowledge}\n"
-        if skills:
-            summary_text += f"Strategies/methods for next time:\n  {skills}\n"
-        if execution:
-            summary_text += f"Mistakes to avoid:\n  {execution}\n"
-        if time:
-            summary_text += f"Plans and timing:\n  {time}\n"
+        for question in general_reflections:
+            summary_text += f"{question}\n  {general_reflections[question]}\n"
+
     return summary_text.strip()
 
 def apply_styles():
@@ -382,19 +377,22 @@ def main():
 
     st.divider()
     # Only show download if at least one reflection exists
+    
     if st.session_state.reflections:
-        st.subheader("General reflections")
-        knowledge_reflection = st.text_area("**What topics do you need to revise?**", height=150).strip()
-        execution_reflection = st.text_area("**What mistakes will you try to avoid next time?**", height=150).strip()
-        skills_reflection = st.text_area("**What strategies or methods could you use next time?**", height=150).strip()
-        time_reflection = st.text_area("**What would you change about how you plan or pace your work?**", height=150).strip()
-        summary_text = generate_summary_text(student_name,
-            assessment_name,
-            st.session_state.reflections,
-            knowledge_reflection,
-            skills_reflection,
-            execution_reflection,
-            time_reflection) 
+        st.header("General reflections")
+        general_reflections = {
+            "What topics do you need to revise?": "",
+            "What mistakes will you try to avoid next time?": "",
+            "What strategies or methods could you use next time?": "",
+            "What would you change about how you plan or pace your work?": ""
+        }
+        for i, question in enumerate(general_reflections):
+            general_reflections[question] = st.text_area(f"**{question}**", height=150, key=f"general_reflection_{i}").strip()
+            summary_text = generate_summary_text(student_name,
+                assessment_name,
+                st.session_state.reflections,
+                general_reflections
+            ) 
 
         st.download_button(
             label="📄 Download summary (TXT)",
