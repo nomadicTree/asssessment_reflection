@@ -241,15 +241,15 @@ def main():
 
     if st.session_state.reflections:
         st.header("General reflections")
-        general_reflections = {
+        ar.general_reflections = {
             "What topics do you need to revise?": "",
             "What mistakes will you try to avoid next time?": "",
             "What strategies or methods could you use next time?": "",
             "What could you change about how you plan or pace your work?": "",
         }
 
-        for i, question in enumerate(general_reflections):
-            general_reflections[question] = st.text_area(
+        for i, question in enumerate(ar.general_reflections):
+            ar.general_reflections[question] = st.text_area(
                 f"**{question}**", height=150, key=f"general_reflection_{i}"
             ).strip()
 
