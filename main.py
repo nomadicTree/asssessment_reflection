@@ -1,6 +1,7 @@
 import streamlit as st
 import yaml
 from pathlib import Path
+from PIL import Image
 from question_reflection import Reflection
 
 SUBJECTS_FILE = "subjects.yaml"
@@ -180,6 +181,11 @@ def render_reflection(index, course_reflection_data, available_topics):
     else:
         marks_percent = 0
     st.progress(marks_percent / 100)
+
+    uploaded_file = st.file_uploader("**Upload a screenshot of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption=f"Question {question_number}", use_container_width=True)
 
     # Select question type
     selected_question_type_name = st.radio(
