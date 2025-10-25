@@ -71,14 +71,6 @@ def create_summary_pdf(ar, output_buffer):
             )
         )
 
-        # Marks
-        marks_str = f"{r.achieved_marks}/{r.available_marks}"
-        if r.available_marks > 0:
-            marks_str += f" ({r.marks_percentage()}%)"
-        elements.append(
-            Paragraph(f"<b>Marks:</b> {marks_str}", styles["Normal"])
-        )
-
         # Question image
         if r.question_image:
             try:
@@ -95,6 +87,14 @@ def create_summary_pdf(ar, output_buffer):
                         styles["Normal"],
                     )
                 )
+
+        # Marks
+        marks_str = f"{r.achieved_marks}/{r.available_marks}"
+        if r.available_marks > 0:
+            marks_str += f" ({r.marks_percentage()}%)"
+        elements.append(
+            Paragraph(f"<b>Marks:</b> {marks_str}", styles["Normal"])
+        )
 
         # Question type
         if r.question_type:
