@@ -185,7 +185,7 @@ def input_question_number(index):
     )
     return question_number
 
-def input_question_image(index):
+def input_question_image(index, question_number):
     uploaded_file = st.file_uploader("**Upload an image of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
@@ -260,7 +260,7 @@ def render_reflection(index, course_reflection_data, available_topics):
     question_number = input_question_number(index)
     available_marks, achieved_marks = input_marks(index)
     render_marks_status_bar(available_marks, achieved_marks)
-    question_image = input_question_image(index)
+    question_image = input_question_image(index, question_number)
     selected_question_type_name = input_question_type(index, question_type_names) 
     selected_question_type = question_types[selected_question_type_name]
     available_statements = core_statements + selected_question_type.get("statements", [])
