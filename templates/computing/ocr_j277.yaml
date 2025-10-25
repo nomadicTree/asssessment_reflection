@@ -2,7 +2,6 @@ id: ocr_j277
 inherits:
   - common
   - basic_programming
-
 question_types:
   Non-programming:
     statements:

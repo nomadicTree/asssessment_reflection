@@ -1,0 +1,39 @@
+# basic_programming.yaml
+id: basic_programming
+inherits: null
+question_types:
+  Programming:
+    statements:
+      - Used valid identifiers
+      - Used meaningful identifiers for variables and subprograms
+      - Took and stored all required inputs
+      - Wrote all operators correctly  # e.g., ==, <=, DIV, MOD
+      - Only used subprograms where instructed
+    options:
+      Selection:
+        statements:
+          - Identified the need for selection (if/else/switch)
+          - Attempted using selection
+          - Balanced both sides of all logical operators (e.g., `y < x AND x < z`)
+      Iteration:
+        statements:
+          - Identified the need for iteration
+          - Attempted implementing a loop
+          - Implemented a loop that repeats the correct number of times
+          - Correctly identified which kind of loop to use (e.g., for/while/do-while)
+      Arrays (1D):
+        statements:
+          - Identified the need for an array
+          - Attempted using an array
+      Subprograms:
+        statements:
+          - Identified the need for subprograms
+          - Attempted using subprograms
+          - Wrote a correct subprogram definition (e.g., `def name(parameters):`)
+          - Included the correct number of parameters in the subprogram definition
+          - Did not override parameters with inputs 
+      File handling:
+        statements:
+          - Identified the need for file handling
+          - Attempted using file handling
+          - Opened and closed all files
