@@ -76,6 +76,7 @@ class AssessmentReflection:
     subject: Subject = None
     course: Course = None
     reflections: List[Reflection] = field(default_factory=list)
+    general_reflections: dict = field(default_factory=dict)
 
     def generate_file_name(self, extension):
         file_name = ""
