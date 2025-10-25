@@ -147,18 +147,18 @@ def load_template(template_id, all_templates, visited=None):
     loaded[template_id] = merged_config
     return merged_config
 
-def render_reflection(index, course_reflection_data, available_topics):
-    st.subheader(f"Reflection {index + 1}:")
-    core_statements = course_reflection_data.get("statements", [])
-    question_types = course_reflection_data.get("question_types", {})
-    question_type_names = list(question_types.keys())
+def render_marks_status_bar(available_marks, achieved_marks):
+    if available_marks > 0:
+        marks_percent = int((achieved_marks / available_marks) * 100)
+    else:
+        marks_percent = 0
+    col1, col2 = st.columns([93, 7])
+    with col1:
+        st.progress(marks_percent / 100)
+    with col2:
+        st.markdown(f"{marks_percent}%")
 
-    question_number = st.text_input(
-        "**Question number:**",
-        key=f"question_number_{index}",
-        placeholder="E.g., 5.b.ii"
-    )
-
+def input_marks(index):
     col1, col2 = st.columns([1, 1])
     with col1:
         available_marks = st.number_input(
@@ -175,32 +175,32 @@ def render_reflection(index, course_reflection_data, available_topics):
             max_value=available_marks,
             key=f"achieved_marks_{index}"
         )
+    return available_marks, achieved_marks
 
-    if available_marks > 0:
-        marks_percent = int((achieved_marks / available_marks) * 100)
-    else:
-        marks_percent = 0
-    col1, col2 = st.columns([93, 7])
-    with col1:
-        st.progress(marks_percent / 100)
-    with col2:
-        st.markdown(f"{marks_percent}%")
+def input_question_number(index):
+    question_number = st.text_input(
+        "**Question number:**",
+        key=f"question_number_{index}",
+        placeholder="E.g., 5.b.ii"
+    )
+    return question_number
 
-    uploaded_file = st.file_uploader("**Upload a screenshot of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
+def input_question_image(index):
+    uploaded_file = st.file_uploader("**Upload an image of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, caption=f"Question {question_number}", use_container_width=True)
+        return image
 
-    # Select question type
+def input_question_type(index, question_type_names):
     selected_question_type_name = st.radio(
         "**Type of question:**",
         question_type_names,
         key=f"question_type_{index}",
     )
-    
-    selected_question_type = question_types[selected_question_type_name]
-    statements = core_statements + selected_question_type.get("statements", [])
+    return selected_question_type_name
 
+def input_topics(index, available_topics):
     # Multiselect for topics
     selected_topics = st.multiselect(
         "**Which topic(s) does this question assess?**",
@@ -208,32 +208,30 @@ def render_reflection(index, course_reflection_data, available_topics):
         key=f"topics_{index}",
         placeholder="Choose topics"
     )
-    
-    st.markdown("**Select applicable statements:**")
+    return selected_topics
 
+def select_statements(index, statements):
+    st.markdown("**Select applicable statements:**")
     selected_statements = []
     for i, statement in enumerate(statements):
         checked = st.checkbox(statement, key=f"statement_{index}_{i}")
         if checked:
             selected_statements.append(statement)
-    
-    # Options (e.g., programming constructs)
-    available_options = selected_question_type.get("options", {})
+    return selected_statements
+
+def select_option_statements(index, available_options):
     selected_option_statements = {}
     
     if available_options:
-        # Step 1: let student choose which constructs are relevant
+        # Step 1: let student choose which options are relevant
         selected_options = st.multiselect(
             "**Select applicable options:**",
             available_options,
             key=f"options_{index}",
             placeholder="Choose options"
         )
-        #for option in options.keys():
-        #    if st.checkbox(option, key=f"option_{index}_{option}"):
-        #        relevant_options.append(option)
         
-        # Step 2: show statements only for selected constructs
+        # Step 2: show statements only for selected options
         for option in selected_options:
             st.write(f"**{option}:**")
             option_statements = available_options[option].get("statements", [])
@@ -243,13 +241,34 @@ def render_reflection(index, course_reflection_data, available_topics):
                 if checked:
                     selected_statements_for_option.append(stmt)
             selected_option_statements[option] = selected_statements_for_option
-    
+    return selected_option_statements
 
+def input_written_reflection(index):
     written_reflection = st.text_area(
         "**What could you do differently to improve your response to a question like this?**",
         height=150,
         key=f"future_reflection_{index}"
     ).strip()
+    return written_reflection
+
+def render_reflection(index, course_reflection_data, available_topics):
+    st.subheader(f"Reflection {index + 1}:")
+    core_statements = course_reflection_data.get("statements", [])
+    question_types = course_reflection_data.get("question_types", {})
+    question_type_names = list(question_types.keys())
+
+    question_number = input_question_number(index)
+    available_marks, achieved_marks = input_marks(index)
+    render_marks_status_bar(available_marks, achieved_marks)
+    question_image = input_question_image(index)
+    selected_question_type_name = input_question_type(index, question_type_names) 
+    selected_question_type = question_types[selected_question_type_name]
+    available_statements = core_statements + selected_question_type.get("statements", [])
+    selected_topics = input_topics(index, available_topics)
+    selected_statements = select_statements(index, available_statements)
+    available_options = selected_question_type.get("options", {})
+    selected_option_statements = select_option_statements(index, available_options)
+    written_reflection = input_written_reflection(index)
     
     # Save everything in session_state
     st.session_state.reflections[index] = Reflection(
@@ -260,7 +279,8 @@ def render_reflection(index, course_reflection_data, available_topics):
         selected_topics,
         selected_statements,
         selected_option_statements,
-        written_reflection
+        written_reflection,
+        question_image
     ) 
 
     if index + 1 < len(st.session_state.reflections):

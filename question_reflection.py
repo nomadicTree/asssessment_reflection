@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from PIL import Image
 
 @dataclass
 class Reflection():
@@ -10,3 +11,4 @@ class Reflection():
     selected_statements: list = field(default_factory=list)
     selected_option_statements: dict = field(default_factory=dict)
     written_reflection: str = ""
+    question_image: Image = None
