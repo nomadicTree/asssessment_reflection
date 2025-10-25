@@ -1,10 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 from PIL import Image
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Image, Spacer, Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
+
 
 @dataclass
 class QuestionTypeOption:
@@ -52,7 +49,7 @@ class Reflection:
     question_type: str = ""
     topics: List[Topic] = field(default_factory=list)
     selected_statements: list = field(default_factory=list)
-    selected_option_statements: dict = field(default_factory=dict)
+    selected_options: dict = field(default_factory=dict)
     written_reflection: str = ""
     question_image: Image = None
 
@@ -62,6 +59,7 @@ class Reflection:
         else:
             marks_percentage = 0
         return marks_percentage
+
 
 @dataclass
 class AssessmentReflection:
@@ -81,35 +79,3 @@ class AssessmentReflection:
             file_name += f"{self.assessment_name}"
         file_name += f" reflection summary.{extension}"
         return file_name.strip()
-
-    def create_summary_pdf(self, output_path):
-        doc = SimpleDocTemplate(output_path, pagesize=A4)
-        styles = getSampleStyleSheet()
-
-        elements = []
-
-        elements.append(Paragraph("<b>Assessment Reflection</b>", styles["Title"]))
-        elements.append(Spacer(1, 12))
-
-        elements.append(Paragraph(f"<b>Name:</b> {self.student_name}", styles["Normal"]))
-        elements.append(Paragraph(f"<b>Assessment:</b> {self.assessment_name}", styles["Normal"]))
-        elements.append(Spacer(1, 18))
-
-        elements.append(Paragraph(f"<b>Question Reflections</b>", styles["Heading2"]))
-
-        for r in self.reflections:
-            elements.append(Paragraph(f"<b>Question {r.question_number}</b>", styles["Heading3"]))
-            marks_str = f"<b>Marks: </b> {r.achieved_marks}/{r.available_marks}"
-            if r.marks_percentage():
-                marks_str += f" ({r.marks_percentage()}%)"
-            elements.append(Paragraph(marks_str, styles["Normal"]))
-            elements.append(Paragraph(f"<b>Question type:</b> {r.question_type}"))
-            topics_table_data = [["Topic code", "Topic name"]]
-            for t in r.topics:
-                topics_table_data.append([[t]])
-
-            topics_table = Table(topics_table_data, colWidths=[80, 400])
-            elements.append(topics_table)
-
-
-        doc.build(elements)

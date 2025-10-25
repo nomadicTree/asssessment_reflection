@@ -5,6 +5,7 @@ from PIL import Image
 from models import Reflection, Topic, Course, Subject, QuestionType, QuestionTypeOption, AssessmentReflection
 from utils import load_yaml 
 from templates import apply_template_to_course
+from pdf import create_summary_pdf
 
 SUBJECTS_FILE = "./data/subjects.yaml"
 
@@ -47,16 +48,16 @@ def input_question_image(index, question_number):
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, caption=f"Question {question_number}", width="content")
-        return image
+        return uploaded_file
 
 def input_question_type(index, available_question_types):
-    selected_question_type_name = st.radio(
+    selected_question_type = st.radio(
         "**Type of question:**",
         available_question_types,
         format_func=lambda q: q.name,
         key=f"question_type_{index}",
     )
-    return selected_question_type_name
+    return selected_question_type
 
 def select_topics(index, topics):
     selected_topics = st.multiselect(
@@ -115,12 +116,12 @@ def render_reflection(index, available_topics, available_question_types):
     r.available_marks, r.achieved_marks = input_marks(index)
     render_marks_status_bar(r.marks_percentage())
     r.question_image = input_question_image(index, r.question_number)
-    selected_question_type = input_question_type(index, available_question_types)
-    available_statements = selected_question_type.statements
+    r.question_type = input_question_type(index, available_question_types)
+    available_statements = r.question_type.statements
     r.topics = select_topics(index, available_topics)
     r.selected_statements = select_statements(index, available_statements)
-    available_options = selected_question_type.options
-    r.selected_option_statements = select_option_statements(index, available_options)
+    available_options = r.question_type.options
+    r.selected_options = select_option_statements(index, available_options)
     r.written_reflection = input_written_reflection(index)
     
     # Save everything in session_state
@@ -128,7 +129,7 @@ def render_reflection(index, available_topics, available_question_types):
 
     if index + 1 < len(st.session_state.reflections):
         st.divider()
-
+    
 def apply_styles():
     st.markdown("""
         <style>
@@ -206,9 +207,12 @@ def main():
             "What strategies or methods could you use next time?": "",
             "What could you change about how you plan or pace your work?": ""
         }
+        if st.button("PDF"):
+            for r in st.session_state.reflections:
+                ar.reflections.append(r)
+            create_summary_pdf(ar, "report.pdf")
         for i, question in enumerate(general_reflections):
             general_reflections[question] = st.text_area(f"**{question}**", height=150, key=f"general_reflection_{i}").strip()
-        summary_text = ar.generate_summary_text(general_reflections)
 
         st.download_button(
             label="📄 Download summary (TXT)",
