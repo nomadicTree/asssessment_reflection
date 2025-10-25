@@ -232,7 +232,7 @@ def main():
         # Render all current reflections
         for i in range(len(st.session_state.reflections)):
             render_reflection(i, ar.course.topics, ar.course.question_types)
-    if st.button("➕ Add new question", width="content"):
+    if st.button("➕ Add new question", use_container_width=True):
         st.session_state.reflections.append(Reflection())
         st.rerun()
 
