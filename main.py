@@ -2,6 +2,7 @@ import streamlit as st
 import yaml
 from pathlib import Path
 from PIL import Image
+from io import BytesIO
 from models import Reflection, Topic, Course, Subject, QuestionType, QuestionTypeOption, AssessmentReflection
 from utils import load_yaml 
 from templates import apply_template_to_course
@@ -207,20 +208,32 @@ def main():
             "What strategies or methods could you use next time?": "",
             "What could you change about how you plan or pace your work?": ""
         }
-        if st.button("PDF"):
-            for r in st.session_state.reflections:
-                ar.reflections.append(r)
-            create_summary_pdf(ar, "report.pdf")
+
         for i, question in enumerate(general_reflections):
             general_reflections[question] = st.text_area(f"**{question}**", height=150, key=f"general_reflection_{i}").strip()
 
-        st.download_button(
-            label="📄 Download summary (TXT)",
-            data=summary_text,
-            file_name=ar.generate_file_name("txt"),
-            mime="text/plain",
-            width="content"
-        )
+        if "show_pdf_download" not in st.session_state:
+            st.session_state.show_pdf_download = False
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("Generate PDF", use_container_width=True):
+                st.session_state.show_pdf_download = True
+
+                for r in st.session_state.reflections:
+                    ar.reflections.append(r)
+        if st.session_state.show_pdf_download:
+            pdf_buffer = BytesIO()
+            create_summary_pdf(ar, pdf_buffer)
+            pdf_buffer.seek(0)
+            # Provide a download button with the actual bytes
+            with col2:
+                st.download_button(
+                    label="📄 Download PDF",
+                    data=pdf_buffer,
+                    file_name="assessment_reflection.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
 
 if __name__ == "__main__":
     main()
