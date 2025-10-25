@@ -8,11 +8,13 @@ class QuestionTypeOption:
     name: str
     statements: list = field(default_factory=list)
 
+
 @dataclass
 class QuestionType:
     name: str
     statements: list = field(default_factory=list)
     options: List[QuestionTypeOption] = field(default_factory=list)
+
 
 @dataclass
 class Template:
@@ -20,6 +22,7 @@ class Template:
     statements: List[str] = field(default_factory=list)
     question_types: Dict[str, QuestionType] = field(default_factory=dict)
     inherits: List[str] = field(default_factory=list)
+
 
 @dataclass
 class Topic:
@@ -29,6 +32,7 @@ class Topic:
     def label(self):
         return f"{self.code}: {self.name}"
 
+
 @dataclass
 class Course:
     name: str
@@ -36,10 +40,12 @@ class Course:
     topics: List[Topic] = field(default_factory=list)
     question_types: List[QuestionType] = field(default_factory=list)
 
+
 @dataclass
 class Subject:
     name: str
     courses: List[Course] = field(default_factory=list)
+
 
 @dataclass
 class Reflection:
@@ -55,7 +61,9 @@ class Reflection:
 
     def marks_percentage(self):
         if self.available_marks > 0:
-            marks_percentage = int((self.achieved_marks / self.available_marks) * 100)
+            marks_percentage = int(
+                (self.achieved_marks / self.available_marks) * 100
+            )
         else:
             marks_percentage = 0
         return marks_percentage

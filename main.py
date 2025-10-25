@@ -1,14 +1,19 @@
-import streamlit as st
-import yaml
-from pathlib import Path
-from PIL import Image
 from io import BytesIO
-from models import Reflection, Topic, Course, Subject, QuestionType, QuestionTypeOption, AssessmentReflection
-from utils import load_yaml 
+import streamlit as st
+from PIL import Image
+from models import (
+    Reflection,
+    Topic,
+    Course,
+    Subject,
+    AssessmentReflection,
+)
+from utils import load_yaml
 from templates import apply_template_to_course
 from pdf import create_summary_pdf
 
 SUBJECTS_FILE = "./data/subjects.yaml"
+
 
 def render_marks_status_bar(marks_percentage):
     col1, col2 = st.columns([93, 7])
@@ -17,6 +22,7 @@ def render_marks_status_bar(marks_percentage):
     with col2:
         st.markdown(f"{marks_percentage}%")
 
+
 def input_marks(index):
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -24,7 +30,7 @@ def input_marks(index):
             "**Marks available:**",
             min_value=0,
             step=1,
-            key=f"available_marks_{index}"
+            key=f"available_marks_{index}",
         )
     with col2:
         achieved_marks = st.number_input(
@@ -32,24 +38,31 @@ def input_marks(index):
             min_value=0,
             step=1,
             max_value=available_marks,
-            key=f"achieved_marks_{index}"
+            key=f"achieved_marks_{index}",
         )
     return available_marks, achieved_marks
+
 
 def input_question_number(index):
     question_number = st.text_input(
         "**Question number:**",
         key=f"question_number_{index}",
-        placeholder="E.g., 5.b.ii"
+        placeholder="E.g., 5.b.ii",
     )
     return question_number
 
-def input_question_image(index, question_number):
-    uploaded_file = st.file_uploader("**Upload an image of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
+
+def input_question_image(index):
+    uploaded_file = st.file_uploader(
+        "**Upload an image of the question**",
+        type=["png", "jpg", "jpeg"],
+        key=f"uploaded_file{index}",
+    )
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, width="content")
         return uploaded_file
+
 
 def input_question_type(index, available_question_types):
     selected_question_type = st.radio(
@@ -60,14 +73,16 @@ def input_question_type(index, available_question_types):
     )
     return selected_question_type
 
+
 def select_topics(index, topics):
     selected_topics = st.multiselect(
         "**Which topic(s) does this question assess?**",
         topics,
         format_func=lambda c: c.label(),
-        key=f"topics_{index}"
+        key=f"topics_{index}",
     )
     return selected_topics
+
 
 def select_statements(index, statements):
     st.markdown("**Select applicable statements:**")
@@ -78,9 +93,10 @@ def select_statements(index, statements):
             selected_statements.append(statement)
     return selected_statements
 
+
 def select_option_statements(index, available_options):
     selected_option_statements = {}
-    
+
     if available_options:
         # Step 1: let student choose which options are relevant
         selected_options = st.multiselect(
@@ -88,27 +104,31 @@ def select_option_statements(index, available_options):
             available_options,
             key=f"options_{index}",
             placeholder="Choose options",
-            format_func=lambda q: q.name
+            format_func=lambda q: q.name,
         )
-        
+
         # Step 2: show statements only for selected options
         for option in selected_options:
             st.write(f"**{option.name}:**")
             selected_statements = []
             for j, stmt in enumerate(option.statements):
-                checked = st.checkbox(stmt, key=f"option_statement_{index}_{option}_{j}")
+                checked = st.checkbox(
+                    stmt, key=f"option_statement_{index}_{option}_{j}"
+                )
                 if checked:
                     selected_statements.append(stmt)
             selected_option_statements[option.name] = selected_statements
     return selected_option_statements
 
+
 def input_written_reflection(index):
     written_reflection = st.text_area(
         "**What could you do differently to improve your response to a question like this?**",
         height=150,
-        key=f"future_reflection_{index}"
+        key=f"future_reflection_{index}",
     ).strip()
     return written_reflection
+
 
 def render_reflection(index, available_topics, available_question_types):
     r = Reflection()
@@ -116,7 +136,7 @@ def render_reflection(index, available_topics, available_question_types):
     r.question_number = input_question_number(index)
     r.available_marks, r.achieved_marks = input_marks(index)
     render_marks_status_bar(r.marks_percentage())
-    r.question_image = input_question_image(index, r.question_number)
+    r.question_image = input_question_image(index)
     r.question_type = input_question_type(index, available_question_types)
     available_statements = r.question_type.statements
     r.topics = select_topics(index, available_topics)
@@ -124,15 +144,17 @@ def render_reflection(index, available_topics, available_question_types):
     available_options = r.question_type.options
     r.selected_options = select_option_statements(index, available_options)
     r.written_reflection = input_written_reflection(index)
-    
+
     # Save everything in session_state
     st.session_state.reflections[index] = r
 
     if index + 1 < len(st.session_state.reflections):
         st.divider()
-    
+
+
 def apply_styles():
-    st.markdown("""
+    st.markdown(
+        """
         <style>
             /* Base font size for most text elements */
             body, p, span, div, li {
@@ -148,7 +170,10 @@ def apply_styles():
             button, st.button, footer, header, .stFileUploader {display: none !important;}
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 def load_subjects(file_path):
     data = load_yaml(file_path)
@@ -157,10 +182,20 @@ def load_subjects(file_path):
     for subject_name, subject_data in data["subjects"].items():
         courses = []
         for course_name, course_data in subject_data["courses"].items():
-            topics = [Topic(code=code, **fields) for code, fields in course_data["topics"].items()]
-            courses.append(Course(name=course_name, template=course_data["template"], topics=topics))
+            topics = [
+                Topic(code=code, **fields)
+                for code, fields in course_data["topics"].items()
+            ]
+            courses.append(
+                Course(
+                    name=course_name,
+                    template=course_data["template"],
+                    topics=topics,
+                )
+            )
         subjects.append(Subject(name=subject_name, courses=courses))
     return subjects
+
 
 def main():
     ar = AssessmentReflection()
@@ -173,8 +208,12 @@ def main():
     subjects = load_subjects(SUBJECTS_FILE)
     ar.student_name = st.text_input("**Your name:**").strip()
     ar.assessment_name = st.text_input("**Assessment name:**").strip()
-    ar.subject = st.radio("**Subject:**", subjects, format_func=lambda s: s.name)
-    ar.course = st.radio("**Course:**", ar.subject.courses, format_func=lambda c: c.name)
+    ar.subject = st.radio(
+        "**Subject:**", subjects, format_func=lambda s: s.name
+    )
+    ar.course = st.radio(
+        "**Course:**", ar.subject.courses, format_func=lambda c: c.name
+    )
 
     if not ar.course.question_types:
         apply_template_to_course(ar.course)
@@ -199,18 +238,20 @@ def main():
 
     st.divider()
     # Only show download if at least one reflection exists
-    
+
     if st.session_state.reflections:
         st.header("General reflections")
         general_reflections = {
             "What topics do you need to revise?": "",
             "What mistakes will you try to avoid next time?": "",
             "What strategies or methods could you use next time?": "",
-            "What could you change about how you plan or pace your work?": ""
+            "What could you change about how you plan or pace your work?": "",
         }
 
         for i, question in enumerate(general_reflections):
-            general_reflections[question] = st.text_area(f"**{question}**", height=150, key=f"general_reflection_{i}").strip()
+            general_reflections[question] = st.text_area(
+                f"**{question}**", height=150, key=f"general_reflection_{i}"
+            ).strip()
 
         if "show_pdf_download" not in st.session_state:
             st.session_state.show_pdf_download = False
@@ -232,8 +273,9 @@ def main():
                     data=pdf_buffer,
                     file_name="assessment_reflection.pdf",
                     mime="application/pdf",
-                    use_container_width=True
+                    use_container_width=True,
                 )
+
 
 if __name__ == "__main__":
     main()
