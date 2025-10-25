@@ -4,6 +4,9 @@ from pathlib import Path
 from PIL import Image
 from reflection import Reflection
 from topic import Topic
+from assessment_reflection import AssessmentReflection
+from course import Course
+from subject import Subject
 
 SUBJECTS_FILE = "subjects.yaml"
 TEMPLATES_DIR = Path("templates")
@@ -348,7 +351,20 @@ def generate_file_name(student_name, assessment_name, extension):
     file_name += f" reflection summary.{extension}"
     return file_name.strip()
 
+def load_subjects(file_path):
+    data = load_yaml(file_path)
+
+    subjects = []
+    for subject_name, subject_data in data["subjects"].items():
+        courses = []
+        for course_name, course_data in subject_data["courses"].items():
+            topics = [Topic(code=code, **fields) for code, fields in course_data["topics"].items()]
+            courses.append(Course(name=course_name, template=course_data["template"], topics=topics))
+        subjects.append(Subject(name=subject_name, courses=courses))
+    return subjects
+
 def main():
+    ar = AssessmentReflection()
     apply_styles()
     st.title("Assessment Reflection")
     st.set_page_config(
@@ -356,23 +372,13 @@ def main():
     )
     all_templates = load_all_templates(TEMPLATES_DIR)
 
-    subject_courses = load_yaml(SUBJECTS_FILE)
-
-    student_name = st.text_input("**Your name:**").strip()
-    assessment_name = st.text_input("**Assessment name:**").strip()
-
-    available_subjects = subject_courses["subjects"]
-    selected_subject = st.radio("**Subject:**", list(available_subjects.keys()))
-
-    available_courses = available_subjects[selected_subject]["courses"]
-    selected_course = st.radio("**Course:**", list(available_courses.keys()))
-
-    course_info = available_courses[selected_course]
-    template_id = course_info.get("template")
-    course_reflection_data = load_template(template_id, all_templates)
-
-    available_topics_dict = available_courses[selected_course]["topics"]
-    available_topics = [Topic(code=code, **fields) for code, fields in available_topics_dict.items()]
+    subjects = load_subjects(SUBJECTS_FILE)
+    ar.student_name = st.text_input("**Your name:**").strip()
+    ar.assessment_name = st.text_input("**Assessment name:**").strip()
+    ar.subject = st.radio("**Subject:**", subjects, format_func=lambda s: s.name)
+    ar.course = st.radio("**Course:**", ar.subject.courses, format_func=lambda c: c.name)
+    available_topics = ar.course.topics
+    course_reflection_data = load_template(ar.course.template, all_templates)
 
     st.divider()
 
