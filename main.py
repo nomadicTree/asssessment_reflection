@@ -180,7 +180,11 @@ def render_reflection(index, course_reflection_data, available_topics):
         marks_percent = int((achieved_marks / available_marks) * 100)
     else:
         marks_percent = 0
-    st.progress(marks_percent / 100)
+    col1, col2 = st.columns([93, 7])
+    with col1:
+        st.progress(marks_percent / 100)
+    with col2:
+        st.markdown(f"{marks_percent}%")
 
     uploaded_file = st.file_uploader("**Upload a screenshot of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
     if uploaded_file is not None:
