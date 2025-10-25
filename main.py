@@ -48,7 +48,7 @@ def input_question_image(index, question_number):
     uploaded_file = st.file_uploader("**Upload an image of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption=f"Question {question_number}", width="content")
+        st.image(image, width="content")
         return uploaded_file
 
 def input_question_type(index, available_question_types):
