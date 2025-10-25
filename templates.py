@@ -95,5 +95,4 @@ def apply_template_to_course(course, templates_dir=TEMPLATES_DIR):
             )
         )
 
-    print(course.question_types)
     course.question_types = question_types
