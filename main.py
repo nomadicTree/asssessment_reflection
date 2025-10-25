@@ -189,7 +189,7 @@ def input_question_image(index, question_number):
     uploaded_file = st.file_uploader("**Upload an image of the question**", type=["png", "jpg", "jpeg"], key=f"uploaded_file{index}")
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption=f"Question {question_number}", use_container_width=True)
+        st.image(image, caption=f"Question {question_number}", width="content")
         return image
 
 def input_question_type(index, question_type_names):
@@ -345,7 +345,7 @@ def apply_styles():
             }
 
             @media print {
-            button, st.button, footer, header {display: none !important;}
+            button, st.button, footer, header, .stFileUploader {display: none !important;}
             }
         </style>
     """, unsafe_allow_html=True)
@@ -401,7 +401,7 @@ def main():
         # Render all current reflections
         for i in range(len(st.session_state.reflections)):
             render_reflection(i, course_reflection_data, friendly_topic_list)
-    if st.button("➕ Add new question", use_container_width=True):
+    if st.button("➕ Add new question", width="content"):
         st.session_state.reflections.append(Reflection())
         st.rerun()
 
@@ -429,7 +429,7 @@ def main():
             data=summary_text,
             file_name=generate_file_name(student_name, assessment_name, "txt"),
             mime="text/plain",
-            use_container_width=True
+            width="content"
         )
 
 if __name__ == "__main__":
