@@ -16,8 +16,8 @@ question_types:
       - Evidenced all points made
       - Related all points made back to the scenario of the question
       - Wrote a conclusion
-      options:
-        Legal/ethical:
-          statements:
-            - Identified at least one relevant law
-            - Discussed the significance of at least one law
+    options:
+      Legal/ethical:
+        statements:
+          - Identified at least one relevant law
+          - Discussed the significance of at least one law
