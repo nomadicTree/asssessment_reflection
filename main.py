@@ -208,10 +208,10 @@ def main():
     subjects = load_subjects(SUBJECTS_FILE)
     ar.student_name = st.text_input("**Your name:**").strip()
     ar.assessment_name = st.text_input("**Assessment name:**").strip()
-    ar.subject = st.radio(
+    ar.subject = st.selectbox(
         "**Subject:**", subjects, format_func=lambda s: s.name
     )
-    ar.course = st.radio(
+    ar.course = st.selectbox(
         "**Course:**", ar.subject.courses, format_func=lambda c: c.name
     )
 
