@@ -8,3 +8,16 @@ question_types:
       - Showed all my working
       - Did all calculations accurately
       - Linked my answer to the scenario
+  QER:
+    statements:
+      - Wrote headings for each factor given in the question
+      - Wrote at least one point in favour for each factor
+      - Wrote at least one point in opposition for each factor
+      - Evidenced all points made
+      - Related all points made back to the scenario of the question
+      - Wrote a conclusion
+      options:
+        Legal/ethical:
+          statements:
+            - Identified at least one relevant law
+            - Discussed the significance of at least one law
