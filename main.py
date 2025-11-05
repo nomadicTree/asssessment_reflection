@@ -65,7 +65,7 @@ def input_question_image(index):
 
 
 def input_question_type(index, available_question_types):
-    selected_question_type = st.radio(
+    selected_question_type = st.selectbox(
         "**Type of question:**",
         available_question_types,
         format_func=lambda q: q.name,
